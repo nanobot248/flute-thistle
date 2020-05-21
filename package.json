@@ -45,7 +45,8 @@
     "node": ">=8.9"
   },
   "author": {
-    "name": "Andreas Hubert"
+    "name": "Andreas Hubert",
+    "email": "nanobot248@gmail.com"
   },
   "license": "MIT",
   "dependencies": {
