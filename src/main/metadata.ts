@@ -11,12 +11,12 @@
  * between the two.
  */
 
-import { constructor, ObjectType } from "./reflection/types";
+import { ObjectType } from "./reflection/types";
 import { ReflectionObject } from "./reflection/reflection_object";
 
-export const REFLECTION_CLASS_METADATA_KEY = Symbol("flute.reflection.metadata.for-class");
-export const REFLECTION_METHOD_PARAMETER_METADATA_KEY = Symbol("flute.reflection.metadata.for-method-parameter");
-export const REFLECTION_FIELD_METADATA_KEY = Symbol("flute.reflection.metadata.for-field");
+export const METADATA_KEY_CLASS = Symbol("flute.reflection.metadata.for-class");
+export const METADATA_KEY_FIELD = Symbol("flute.reflection.metadata.for-field");
+export const METADATA_KEY_METHOD_PARAMETER = Symbol("flute.reflection.metadata.for-method-parameter");
 
 function getConstructorReflectionObject(target: any, objectType: ObjectType): ReflectionObject {
     if (target == null) {
@@ -31,23 +31,33 @@ function getConstructorReflectionObject(target: any, objectType: ObjectType): Re
 }
 
 /**
- * Attach metadata to a class.
+ * Decorator function for a class. Attach metadata to a class.
  *
  * @param metadataKey The key used to store the data.
  * @param data Any JavaScript object (or string, number, ...).
+ * @param objectType The type of the `target` used on decorator invocation. This should be `ObjectType.CONSTRUCTOR`
+ * (default) if function is used as a decorator or instance if the decorator is applied directly to an instance of
+ * the class.
  */
 export function ClassMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.CONSTRUCTOR) {
     return (target: any | ReflectionObject) => {
         const obj = getConstructorReflectionObject(target, objectType);
-        let classMetadata: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(REFLECTION_CLASS_METADATA_KEY);
+        let classMetadata: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(METADATA_KEY_CLASS);
         if (classMetadata == null) {
             classMetadata = new Map<string | symbol, Map<string | symbol, any>>();
         }
         classMetadata.set(metadataKey, data);
-        obj.setMetadata(REFLECTION_CLASS_METADATA_KEY, classMetadata);
+        obj.setMetadata(METADATA_KEY_CLASS, classMetadata);
     }
 }
 
+/**
+ * Decorator function for a class. Assume the metadata for the given metadataKey is an array (initialize it if necessary)
+ * and insert the `data` at the end of the array.
+ * @param metadataKey The key of the metadata.
+ * @param data The data to append to the metadata array.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function AppendClassMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.CONSTRUCTOR) {
 
     return (target: any | ReflectionObject) => {
@@ -62,6 +72,13 @@ export function AppendClassMetadata(metadataKey: string | symbol, data: any, obj
     };
 }
 
+/**
+ * Decorator function for a class. Assume the metadata for the given metadataKey is an array (initialize it if necessary)
+ * and insert the `data` at the start of the array.
+ * @param metadataKey The key of the metadata.
+ * @param data The data to append to the array.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function PrependClassMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.CONSTRUCTOR) {
     return (target: any | ReflectionObject) => {
         let metadata: any[] = getClassMetadata(target, metadataKey, objectType);
@@ -75,6 +92,13 @@ export function PrependClassMetadata(metadataKey: string | symbol, data: any, ob
     };
 }
 
+/**
+ * Decorator function for a class. Assume the metadata for the given `metadataKey` is a `Set` (initialize if necessary)
+ * and add the `data` to the set.
+ * @param metadataKey The key of the metadata.
+ * @param data The data to add to the set.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function PutClassMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.CONSTRUCTOR) {
     return (target: any | ReflectionObject) => {
         let metadata: any = getClassMetadata(target, metadataKey, objectType);
@@ -97,23 +121,27 @@ export function PutClassMetadata(metadataKey: string | symbol, data: any, object
 /**
  * Get metadata of the given class.
  * @param target The object containing the metadata.
- * @param key The key used to store the data.
+ * @param metadataKey The key used to store the data.
  * @param objectType Metadata is always stored in the constructor. The object type specifies whether
  * `target` is the constructor function or an instance of the class.
  */
-export function getClassMetadata(target: any, key: string | symbol, objectType: ObjectType = ObjectType.INSTANCE): any {
+export function getClassMetadata(target: any, metadataKey: string | symbol,
+    objectType: ObjectType = ObjectType.INSTANCE): any {
+
     const obj = getConstructorReflectionObject(target, objectType);
-    const classMetadata: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(REFLECTION_CLASS_METADATA_KEY);
-    if (classMetadata != null && classMetadata.has(key)) {
-        return classMetadata.get(key);
+    const classMetadata: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(METADATA_KEY_CLASS);
+    if (classMetadata != null && classMetadata.has(metadataKey)) {
+        return classMetadata.get(metadataKey);
     }
     return null;
 }
 
 /**
- * Decorator to attach metadata to a field.
+ * Decorator to attach metadata to a field (property or method).
  * @param metadataKey The key to store the data under.
  * @param metadata The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the constructor or an instance
+ * of the class.
  */
 function FieldMetadata(metadataKey: string | symbol, metadata: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return (target: object, fieldName: string | symbol) => {
@@ -125,16 +153,23 @@ function FieldMetadata(metadataKey: string | symbol, metadata: any, objectType: 
         }
         if (fieldName == null) { fieldName = null; }
         const obj = getConstructorReflectionObject(target, objectType);
-        let fieldsMeta: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(REFLECTION_FIELD_METADATA_KEY);
+        let fieldsMeta: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(METADATA_KEY_FIELD);
         if (fieldsMeta == null) { fieldsMeta = new Map<string | symbol, Map<string | symbol, any>>(); }
         if (!fieldsMeta.has(fieldName)) {
             fieldsMeta.set(fieldName, new Map<string | symbol, any>());
         }
         fieldsMeta.get(fieldName).set(metadataKey, metadata);
-        obj.setMetadata(REFLECTION_FIELD_METADATA_KEY, fieldsMeta);
+        obj.setMetadata(METADATA_KEY_FIELD, fieldsMeta);
     }
 }
 
+/**
+ * Decorator function for a field (method or propertyy). Assume the metadata for the given `metadataKey`
+ * is an array (initialize if necessary) and append the `data` at the end.
+ * @param metadataKey The key for the metadata.
+ * @param data The data to append.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function AppendFieldMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         let metadata: any[] = getFieldMetadata(target, fieldName, metadataKey);
@@ -148,6 +183,13 @@ export function AppendFieldMetadata(metadataKey: string | symbol, data: any, obj
     };
 }
 
+/**
+ * Decorator function. Assume the metadata for the given `metadataKey` is an array (initialize if necessary)
+ * and append the `data` at the start.
+ * @param metadataKey The key for the metadata.
+ * @param data The data to prepend.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function PrependFieldMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         let metadata: any[] = getFieldMetadata(target, fieldName, metadataKey);
@@ -161,6 +203,13 @@ export function PrependFieldMetadata(metadataKey: string | symbol, data: any, ob
     };
 }
 
+/**
+ * Decorator function for a field (property or method). Assume the metadata for the given `metadataKey`
+ * is a `Set` (initialize if necessary) and add the `data` to the set.
+ * @param metadataKey The key for the metadata.
+ * @param data The data to add.
+ * @param objectType The object type of the `target` of the decorator invocation.
+ */
 export function PutFieldMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         let metadata: any = getFieldMetadata(target, fieldName, metadataKey);
@@ -181,10 +230,10 @@ export function PutFieldMetadata(metadataKey: string | symbol, data: any, object
 }
 
 /**
- * Decorator used to add metadata to a property.
- *
- * @param key The key to store the metadata for.
- * @param data The metadata to store.
+ * Decorator used to add metadata to a property. See [FieldMetadata](#fieldmetadata).
+ * @param metaKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
  */
 export function PropertyMetadata(metaKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return (target: object, fieldName: string | symbol) => {
@@ -192,18 +241,36 @@ export function PropertyMetadata(metaKey: string | symbol, data: any, objectType
     }
 }
 
+/**
+ * Decorator used to append metadata to a property. See [AppendFieldMetadata](#appendfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function AppendPropertyMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         AppendFieldMetadata(metadataKey, data, objectType)(target, fieldName);
     };
 }
 
+/**
+ * Decorator to prepend metadata to a property. See [PrependFieldMetadata](#prependfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function PrependPropertyMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         PrependFieldMetadata(metadataKey, data, objectType)(target, fieldName);
     };
 }
 
+/**
+ * Decorator to add metadata to the metadata `Set` of a property. See [PutFieldMetadata](#putfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function PutPropertyMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = ObjectType.INSTANCE) {
     return <T>(target: object, fieldName: string | symbol) => {
         PutFieldMetadata(metadataKey, data, objectType)(target, fieldName);
@@ -211,9 +278,10 @@ export function PutPropertyMetadata(metadataKey: string | symbol, data: any, obj
 }
 
 /**
- * Decorator used to add metadata to a method.
- *
- * @param data The metadata to attach to the method.
+ * Decorator used to add metadata to a method. See [FieldMetadata](#fieldmetadata).
+ * @param metaKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
  */
 export function MethodMetadata(metaKey: string | symbol, data: any, objectType: ObjectType = null) {
     return <T>(target: object, fieldName: string | symbol) => {
@@ -221,18 +289,36 @@ export function MethodMetadata(metaKey: string | symbol, data: any, objectType: 
     }
 }
 
+/**
+ * Decorator used to append metadata to a method. See [AppendFieldMetadata](#appendfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function AppendMethodMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return <T>(target: object, fieldName: string | symbol) => {
         AppendFieldMetadata(metadataKey, data, objectType)(target, fieldName);
     };
 }
 
+/**
+ * Decorator to prepend metadata to a method. See [PrependFieldMetadata](#prependfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function PrependMethodMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return <T>(target: object, fieldName: string | symbol) => {
         PrependFieldMetadata(metadataKey, data, objectType)(target, fieldName);
     };
 }
 
+/**
+ * Decorator to add metadata to the metadata `Set` of a method. See [PutFieldMetadata](#putfieldmetadata)
+ * @param metadataKey The metadata key.
+ * @param data The data to store.
+ * @param objectType Whether the `target` of the decorator invocation is the class constructor or a class instance.
+ */
 export function PutMethodMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return <T>(target: object, fieldName: string | symbol) => {
         PutFieldMetadata(metadataKey, data, objectType)(target, fieldName);
@@ -250,7 +336,7 @@ export function getAllFieldsMetadata(
     target: any, objectType: ObjectType = ObjectType.INSTANCE): Map<string | symbol, Map<string | symbol, any>> {
 
     const obj = getConstructorReflectionObject(target, objectType);
-    const allFields: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(REFLECTION_FIELD_METADATA_KEY);
+    const allFields: Map<string | symbol, Map<string | symbol, any>> = obj.getMetadata(METADATA_KEY_FIELD);
     // if (objectType === ObjectType.INSTANCE) {
     //     console.log("getAllFieldsMetadata: ", { target, objectType, allFields });
     // }
@@ -261,33 +347,35 @@ export function getAllFieldsMetadata(
  * Get all metadata associated with the field.
  *
  * @param target The object containing the metadata.
- * @param key The name of field.
+ * @param fieldName The name of field.
  * @param objectType Metadata is always stored in the constructor. The object type specifies whether
  * `target` is the constructor function or an instance of the class.
  * @returns `null` or `undefined` if no metadata could be found for the field.
  */
-export function getAllMetadataOfField(target: any, key: string | symbol,
+export function getAllMetadataOfField(target: any, fieldName: string | symbol,
     objectType: ObjectType = ObjectType.INSTANCE): Map<string | symbol, any> {
 
     const allFieldsMeta = getAllFieldsMetadata(target, objectType);
-    if (allFieldsMeta != null && allFieldsMeta.has(key)) {
-        return allFieldsMeta.get(key);
+    if (allFieldsMeta != null && allFieldsMeta.has(fieldName)) {
+        return allFieldsMeta.get(fieldName);
     }
 
     return null;
 }
 
+/**
+ * Get the metadata of the field of an object.
+ * @param target The object containing the field.
+ * @param fieldName The name of the field.
+ * @param metadataKey The key the metadata is stored under.
+ * @param objectType The object type of `target`.
+ */
 export function getFieldMetadata(target: any, fieldName: string | symbol, metadataKey: string | symbol,
     objectType: ObjectType = ObjectType.INSTANCE): any {
     if (objectType == null) {
         objectType = fieldName == null ? ObjectType.CONSTRUCTOR : ObjectType.INSTANCE;
     }
     const fieldMetadata: Map<string | symbol, any> = getAllMetadataOfField(target, fieldName, objectType);
-    // if (objectType === ObjectType.INSTANCE) {
-    //     console.log("getFieldMetadata: ", {
-    //         target, fieldName, metadataKey, objectType, fieldMetadata
-    //     });
-    // }
     if (fieldMetadata != null && fieldMetadata.has(metadataKey)) {
         return fieldMetadata.get(metadataKey);
     } else {
@@ -296,10 +384,11 @@ export function getFieldMetadata(target: any, fieldName: string | symbol, metada
 }
 
 /**
- * Set metadata of a method parameter.
+ * Decorator function for method parameters. Set metadata of a method parameter.
  *
  * @param metadataKey The metadata key to store the data under.
  * @param data The metadata value to store.
+ * @param objectType The type of the `target` of the decorator invocation.
  */
 export function MethodParameterMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return (target: object, methodName: string | symbol, index: number) => {
@@ -307,14 +396,14 @@ export function MethodParameterMetadata(metadataKey: string | symbol, data: any,
 
         if (methodName == null) { methodName = null; }
         let methodParameterMeta: Map<number, Map<string | symbol, any>> =
-            getFieldMetadata(target, methodName, REFLECTION_METHOD_PARAMETER_METADATA_KEY, objectType);
+            getFieldMetadata(target, methodName, METADATA_KEY_METHOD_PARAMETER, objectType);
 
         // console.log("(2)");
 
         if (methodParameterMeta == null) {
             methodParameterMeta = new Map<number, Map<string | symbol, any>>();
             // console.log("(2.1) created new map.");
-            FieldMetadata(REFLECTION_METHOD_PARAMETER_METADATA_KEY, methodParameterMeta, objectType)(target, methodName);
+            FieldMetadata(METADATA_KEY_METHOD_PARAMETER, methodParameterMeta, objectType)(target, methodName);
         }
 
         if (!methodParameterMeta.has(index)) {
@@ -336,6 +425,13 @@ export function MethodParameterMetadata(metadataKey: string | symbol, data: any,
     }
 }
 
+/**
+ * Decorator function for method parameters. Assume the metadata is an array (initialize if necessary) and
+ * add the `data` to the end of the array.
+ * @param metadataKey The key for the metadata
+ * @param data The data to add to the array
+ * @param objectType The type of the `target` of the decorator invocation.
+ */
 export function AppendMethodParameterMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return (target: object, fieldName: string | symbol, index: number) => {
         let metadata: any[] = getMethodParameterMetadata(target, fieldName, index, metadataKey, objectType);
@@ -349,6 +445,13 @@ export function AppendMethodParameterMetadata(metadataKey: string | symbol, data
     }
 }
 
+/**
+ * Decorator function for method parameters. Like [AppendMethodParameterMetadata](#methodparametermetadata), but
+ * adds the `data` to the start of the array.
+ * @param metadataKey The key of the metadata.
+ * @param data The data to prepend to the array.
+ * @param objectType The type of the `target` of the decorator invocation.
+ */
 export function PrependMethodParameterMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return (target: object, fieldName: string | symbol, index: number) => {
 
@@ -365,6 +468,12 @@ export function PrependMethodParameterMetadata(metadataKey: string | symbol, dat
     }
 }
 
+/**
+ * Decorator for method parameters. Assumes the metadata is a `Set` and adds the `data` to the set.
+ * @param metadataKey The key of the metadata.
+ * @param data The data to add to the `Set`.
+ * @param objectType The type of the `target` of the decorator invocation.
+ */
 export function PutMethodParameterMetadata(metadataKey: string | symbol, data: any, objectType: ObjectType = null) {
     return (target: object, fieldName: string | symbol, index: number) => {
         let metadata: any = getMethodParameterMetadata(target, fieldName, index, metadataKey, objectType);
@@ -385,7 +494,8 @@ export function PutMethodParameterMetadata(metadataKey: string | symbol, data: a
 }
 
 /**
- * Get the metadata of all method parameters of the method identified by `key`.
+ * Get the metadata of all method parameters of the method identified by `key`. The resulting `Map`
+ * will be indexed by the parameter indices.
  *
  * @param target The object containing the method.
  * @param key The name of the method. If `key` is `null` (or `undefined`), the constructor parameter
@@ -401,12 +511,21 @@ export function getAllMethodParametersMetadata(
         objectType = methodName == null ? ObjectType.CONSTRUCTOR : ObjectType.INSTANCE;
     }
 
-    const parametersMetadata = getFieldMetadata(target, methodName, REFLECTION_METHOD_PARAMETER_METADATA_KEY, objectType);
+    const parametersMetadata = getFieldMetadata(target, methodName, METADATA_KEY_METHOD_PARAMETER, objectType);
     // console.log("getAllMethodParametersMetadata: target =", target, ", methodName =", methodName,
     //     ", objectType =", ObjectType[objectType], ", metadata =", parametersMetadata);
     return parametersMetadata;
 }
 
+/**
+ * Get all metadata of the method parameter identified by `index`. The resulting `Map` will be indexed
+ * by the metadata key of the metadata.
+ *
+ * @param target The object containing the method.
+ * @param methodName The name of the method.
+ * @param index The index of the method parameter.
+ * @param objectType Whether `target` is the constructor of the class itself or an instance of the class.
+ */
 export function getAllMetadataForMethodParameter(target: any, methodName: string | symbol, index: number,
     objectType: ObjectType = ObjectType.INSTANCE): Map<string | symbol, any> {
 
@@ -420,6 +539,15 @@ export function getAllMetadataForMethodParameter(target: any, methodName: string
     return null;
 }
 
+/**
+ * Gets the metadata stored for the given `metadataKey` for the method parameter identified by `index`.
+ *
+ * @param target The object containing the method.
+ * @param methodName The name of the method.
+ * @param index The index of the parameter.
+ * @param metadataKey The key the metadata is stored under.
+ * @param objectType Whether `target` is the constructor of the class or an instance of the class.
+ */
 export function getMethodParameterMetadata(target: any, methodName: string | symbol, index: number,
     metadataKey: string | symbol, objectType: ObjectType = ObjectType.INSTANCE): any {
 
@@ -433,6 +561,13 @@ export function getMethodParameterMetadata(target: any, methodName: string | sym
     return null;
 }
 
+/**
+ * A generic decorator function to set metadata on any of the supported targets (classes, fields/properties/methods,
+ * method parameters).
+ * @param metadataKey The metadata key.
+ * @param value The data to store.
+ * @param objectType The type of the `target` of the decorator invocation.
+ */
 export function SetMetadata(metadataKey: string | symbol, value: any, objectType?: ObjectType) {
     return (target: any, fieldName?: string | symbol, index?: any) => {
         /*console.log("SetMetadata: ", {

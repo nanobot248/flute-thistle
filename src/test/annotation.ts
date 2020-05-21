@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import * as assert from "assert";
 import { AnnotateClass, getClassAnnotations, ObjectType, AnnotateProperty,
     AnnotateMethod, getMethodAnnotations, getPropertyAnnotations, AnnotateMethodParameter,

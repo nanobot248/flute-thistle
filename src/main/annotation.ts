@@ -1,7 +1,8 @@
 /**
  * Utility decorators and functions for handling annotations. Annotations are arbitrary
  * objects that are attached to a class, method, property or method/constructor parameter.
- * While decorators are executed in reverse order, annotations are attached in-order.
+ * Annotations are stored in an array. While decorators are executed in reverse order of their appearance,
+ * annotations are attached in-order.
  *
  * Example:
  * ```
@@ -15,18 +16,23 @@
  * ```
  * ["note1", "note2", "note3"]
  * ```
+ *
+ * The decorators and functions are based on the decorators and functions of the `metadata` module. Therefore,
+ * annotations are stored in the metadata of the constructor of the class.
  */
 
-import { constructor, ObjectType } from "./reflection/types";
-import { ReflectionObject } from "./reflection/reflection_object";
-import { PropertyMetadata, PrependPropertyMetadata, MethodMetadata, PrependMethodMetadata,
-    PrependMethodParameterMetadata, PrependClassMetadata, getClassMetadata, getMethodParameterMetadata,
-    getAllMethodParametersMetadata, getFieldMetadata, SetMetadata } from "./metadata";
+import { ObjectType } from "./reflection/types";
+import { PrependPropertyMetadata, PrependMethodParameterMetadata, PrependClassMetadata,
+    getClassMetadata, getMethodParameterMetadata, getFieldMetadata } from "./metadata";
 
 export const ANNOTATION_KEY_CLASS = Symbol("flute.annotation.for-class");
 export const ANNOTATION_KEY_FIELD = Symbol("flute.annotation.for-field");
 export const ANNOTATION_KEY_METHOD_PARAMETER = Symbol("flute.annotation.for-method-parameter");
 
+/**
+ * Adds an annotation to a field (property or method).
+ * @param annotation The annotation to add. Null-values will be ignored (not added to the annotations array).
+ */
 export function AnnotateField(annotation: any) {
     if (annotation == null) {
         return () => {};
@@ -35,8 +41,14 @@ export function AnnotateField(annotation: any) {
     return PrependPropertyMetadata(ANNOTATION_KEY_FIELD, annotation);
 }
 
-export function getFieldAnnotations(target: any, propertyName: string | symbol, objectType: ObjectType = ObjectType.INSTANCE) {
-    return getFieldMetadata(target, propertyName, ANNOTATION_KEY_FIELD, objectType);
+/**
+ * Get all annotations of a given field.
+ * @param target The object containing the field.
+ * @param fieldName The name of the field.
+ * @param objectType Whether `target` is the class constructor or an instance of the class.
+ */
+export function getFieldAnnotations(target: any, fieldName: string | symbol, objectType: ObjectType = ObjectType.INSTANCE) {
+    return getFieldMetadata(target, fieldName, ANNOTATION_KEY_FIELD, objectType);
 }
 
 /**
@@ -49,6 +61,12 @@ export function AnnotateProperty(annotation: any) {
     return AnnotateField(annotation);
 }
 
+/**
+ *
+ * @param target The object containing the property.
+ * @param propertyName The name of the property.
+ * @param objectType Whether `target` is the class constructor or an instance of the class.
+ */
 export function getPropertyAnnotations(target: any, propertyName: string | symbol, objectType: ObjectType = ObjectType.INSTANCE) {
     return getFieldAnnotations(target, propertyName, objectType);
 }
@@ -63,6 +81,13 @@ export function AnnotateMethod(annotation: any) {
     return AnnotateField(annotation);
 }
 
+/**
+ * Get the annotations of a method.
+ *
+ * @param target The object containing the method.
+ * @param methodName The name of the method.
+ * @param objectType Whether `target` is the class constructor or an instance of the class.
+ */
 export function getMethodAnnotations(target: any, methodName: string | symbol, objectType: ObjectType = ObjectType.INSTANCE) {
     return getFieldAnnotations(target, methodName, objectType);
 }
@@ -121,6 +146,11 @@ export function getClassAnnotations(target: any, objectType: ObjectType = Object
     return getClassMetadata(target, ANNOTATION_KEY_CLASS, objectType);
 }
 
+/**
+ * A generic decorator that adds an annotation to any of the supported target (class, property, method
+ * or method parameter).
+ * @param annotation The annotation to add to the target.
+ */
 export function Annotate(annotation: any) {
     return (target: any, fieldName?: string | symbol, index?: any) => {
         /*console.log("Annotate:", {

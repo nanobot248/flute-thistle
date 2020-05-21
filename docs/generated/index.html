@@ -1,0 +1,274 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@flute/annotations</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@flute/annotations</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@flute/annotations</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#fluteannotations" id="fluteannotations" style="color: inherit; text-decoration: none;">
+					<h1>@flute/annotations</h1>
+				</a>
+				<a href="#summary" id="summary" style="color: inherit; text-decoration: none;">
+					<h2>Summary</h2>
+				</a>
+				<p><code>@flute/annotations</code> provides decorators and methods for adding/retrieving
+				metadata, annotations and tags:</p>
+				<ul>
+					<li><strong>Metadata:</strong> Metadata is arbitrary data attached and retrieved to/from an
+						object with a metadata key. This is equivalent to (and implemented via)
+					<code>Reflect.setMetadata(...)</code> and <code>Reflect.getMetadata(...)</code>.</li>
+					<li><strong>Annotations:</strong> Annotations are a list of arbitrary objects, stored on
+						a class, property, method or method parameter via the metadata methods.
+					Annotations are stored in order of appearance, not order of execution.</li>
+					<li><strong>Tags:</strong> Tags are like annotations with the difference that the are
+						stored in a set. Therefore, no duplicate tags are allowed for a given
+						class, property, method or method parameter and there is no guaranteed
+					order of tags.</li>
+				</ul>
+				<p>All data is stored in the metadata of the
+					<strong>constructor</strong>. When requesting metadata from objects, the data is also
+				loaded from its constructor.</p>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p>To use the package inside your application:</p>
+				<pre><code><span class="hljs-built_in">npm</span> install --save @flute/annotations</code></pre><p>Make sure the following settings are enabled in your project&#39;s <code>tsconfig.json</code>:</p>
+				<pre><code class="language-json">{
+  <span class="hljs-attr">"compilerOptions"</span>: {
+    <span class="hljs-attr">"experimentalDecorators"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"emitDecoratorMetadata"</span>: <span class="hljs-literal">true</span>
+  }
+}</code></pre>
+				<p>Additionally, an implementation of <code>Reflect.getMetadata(...)</code> and <code>Reflect.setMetadata(...)</code>
+				is needed, e.g. install <code>reflect-metadata</code>:</p>
+				<pre><code>npm <span class="hljs-keyword">install</span> <span class="hljs-comment">--save reflect-metadata</span></code></pre><p>Import <code>reflect-metadata</code> in your main module:</p>
+				<pre><code class="language-typescript"><span class="hljs-comment">// inside your main module</span>
+<span class="hljs-comment">// ...</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">'reflect-metadata'</span>;
+<span class="hljs-comment">// ...</span></code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<p>This documentation is not complete yet. Please see the <a href="src/test/">tests</a> and the
+					<a href="src/main/">source code</a> for more information and for the full method signatures.
+				Generated <code>typedoc</code> documentation is available <a href="docs/generated/index.hml">here</a>:</p>
+				<ul>
+					<li><a href="docs/generated/modules/_metadata_.html">Metadata</a></li>
+					<li><a href="docs/generated/modules/_annotations_.html">Annotation</a></li>
+					<li><a href="docs/generated/modules/_tag_.html">Tag</a></li>
+				</ul>
+				<a href="#metadata" id="metadata" style="color: inherit; text-decoration: none;">
+					<h3>Metadata</h3>
+				</a>
+				<p>Metadata can be set via the <code>*Metadata</code> decorators:</p>
+				<ul>
+					<li><code>ClassMethadata</code>, <code>PropertyMetadata</code>, <code>MethodMetadata</code> and <code>MethodParameterMetadata</code>,
+						<code>SetMetadata</code>:
+						Adds or replaces the metadata with the provided key on the corresponding object (class,
+						property, method or method-parameter). There is also a generic <code>FieldMetadata</code> decorator
+						that can be used on properties and methods.
+						<code>SetMetadata</code> is a generic version of the other decorators that can be applied to classes,
+					properties, methods and method parameters.</li>
+					<li><code>AppendClassMethadata</code>, <code>AppendPropertyMetadata</code>, <code>AppendMethodMetadata</code> and <code>AppendMethodParameterMetadata</code>,
+						<code>PrependClassMethadata</code>, <code>PrependPropertyMetadata</code>, <code>PrependMethodMetadata</code> and <code>PrependMethodParameterMetadata</code>:
+						Assumes the metadata for the given key is an array (initializes it if necessary) and
+					add the data to the end (append) or the start (prepen) of the array.</li>
+					<li><code>PutClassMethadata</code>, <code>PutPropertyMetadata</code>, <code>PutMethodMetadata</code> and <code>PutMethodParameterMetadata</code>:
+						Assumes the metadata for the given key is a <code>Set</code> (initializes it if necessary) and
+					adds the data to the set.</li>
+				</ul>
+				<p>Metadata can be retrieved via the corresponding <code>get*Metadata</code> methods.</p>
+				<p>All methods and decorators support a parameter <code>objectType</code> telling whether the object provided
+					is the constructor itself (e.g. when using the decorator methods as decorators) or an instance
+				of the class.</p>
+				<a href="#annotations" id="annotations" style="color: inherit; text-decoration: none;">
+					<h3>Annotations</h3>
+				</a>
+				<p>Annotations are stored in a list. New annotations are prepended via <code>Prepend*Metadata</code>,
+					therefore the sort order of annotations is the reverse of the execution order of the
+				decorators, meaning the annotation list will be <code>[&quot;1&quot;, &quot;2&quot;, &quot;3&quot;]</code> for the following code:</p>
+				<pre><code class="language-typescript"><span class="hljs-meta">@ClassAnnotation</span>(<span class="hljs-string">"1"</span>)
+<span class="hljs-meta">@ClassAnnotation</span>(<span class="hljs-string">"2"</span>)
+<span class="hljs-meta">@ClassAnnotation</span>(<span class="hljs-string">"3"</span>)
+<span class="hljs-keyword">class</span> A {
+}</code></pre>
+				<p>Available decorators are <code>AnnotateClass</code>, <code>AnnotateProperty</code>, <code>AnnotateMethod</code>, <code>AnnotateMethodParameter</code>
+				and the generic version <code>Annotate</code>.</p>
+				<a href="#tags" id="tags" style="color: inherit; text-decoration: none;">
+					<h3>Tags</h3>
+				</a>
+				<p>Tags are stored in a set. Therefore, each tag can only appear once on an a given class, property,
+				method or method parameter and there is no guaranteed order of tags.</p>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p>MIT License</p>
+				<p>Copyright (c) 2020 Andreas Hubert</p>
+				<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+				<p>The above copyright notice and this permission notice (including the next paragraph) shall be included in all copies or substantial portions of the Software.</p>
+				<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Internals</span>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_reflection_types_.html">&quot;reflection/types&quot;</a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_annotation_.html">&quot;annotation&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_metadata_.html">&quot;metadata&quot;</a>
+					</li>
+					<li class=" tsd-kind-external-module tsd-is-external">
+						<a href="modules/_tag_.html">&quot;tag&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

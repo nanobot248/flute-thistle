@@ -19,10 +19,10 @@
     "cov:html": "nyc report --reporter=html",
     "cov:send": "nyc report --reporter=lcov && codecov",
     "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
-    "doc": "run-s doc:html && open-cli build/docs/index.html",
-    "doc:html": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --out build/docs",
-    "doc:json": "typedoc src/ --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
-    "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
+    "doc": "run-s doc:html && open-cli docs/generated/index.html",
+    "doc:html": "typedoc src/main/index.ts --exclude **/*.spec.ts --exclude src/main/reflection/*.ts --target ES2020 --mode library --out docs/generated",
+    "doc:json": "typedoc src/main/index.ts --exclude **/*.spec.ts --exclude src/main/reflection/*.ts --target ES2020 --mode library --json docs/generated/typedoc.json",
+    "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d doc/generated",
     "version": "standard-version",
     "reset": "git clean -dfx && git reset --hard && npm i",
     "clean": "trash build test",
@@ -50,6 +50,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/mocha": "^7.0.2",
+    "@types/reflect-metadata": "^0.1.0",
     "mocha": "^7.1.1",
     "prettier": "^2.0.4",
     "reflect-metadata": "^0.1.13"

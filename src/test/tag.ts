@@ -1,12 +1,10 @@
+import "reflect-metadata";
+
 import * as assert from "assert";
-import { AnnotateClass, getClassAnnotations, ObjectType, AnnotateProperty,
-    AnnotateMethod, getMethodAnnotations, getPropertyAnnotations, AnnotateMethodParameter,
-    getMethodParameterAnnotations,
-    Annotate,
-    getFieldAnnotations} from "../main";
+import { ObjectType } from "../main";
 import { describe, it } from "mocha";
-import { TagClass, TagProperty, TagMethodParameter, getClassTags, getPropertyTags, getMethodParameterTags, TagMethod } from "../main/tag";
-import { MethodParameterMetadata } from "../main/metadata";
+import { TagClass, TagProperty, TagMethodParameter, getClassTags, getPropertyTags, getMethodParameterTags,
+    TagMethod, Tag, getFieldTags, getMethodTags } from "../main/tag";
 
 @TagClass("classTag1")
 @TagClass("classTag2")
@@ -153,5 +151,45 @@ describe("Get tags (instance)", () => {
         assert.ok(tagsSet.has("test1"));
         assert.ok(tagsSet.has("test2"));
         assert.ok(tagsSet.has("test3"));
+    });
+});
+
+@Tag("lorem")
+@Tag("ipsum")
+class H {
+    @Tag("dolor")
+    @Tag("sit")
+    public property1;
+
+    constructor(
+        @Tag("amed")
+        @Tag("consetetur")
+        private param1: string
+    ) { }
+
+    @Tag("sadipscing")
+    @Tag("elitr")
+    public method1(
+        @Tag("sed")
+        @Tag("diam")
+        param1: any
+    ) {}
+}
+
+describe("Tag", () => {
+    it("Get (constructor)", () => {
+        assert.deepStrictEqual(getClassTags(H, ObjectType.CONSTRUCTOR), new Set(["lorem", "ipsum"]));
+        assert.deepStrictEqual(getFieldTags(H, "property1", ObjectType.CONSTRUCTOR), new Set(["dolor", "sit"]));
+        assert.deepStrictEqual(getMethodParameterTags(H, null, 0, ObjectType.CONSTRUCTOR), new Set(["amed","consetetur"]));
+        assert.deepStrictEqual(getMethodTags(H, "method1", ObjectType.CONSTRUCTOR), new Set(["sadipscing", "elitr"]));
+        assert.deepStrictEqual(getMethodParameterTags(H, "method1", 0, ObjectType.CONSTRUCTOR), new Set(["sed", "diam"]));
+    });
+    it("Get (instance)", () => {
+        const h = new H("asdf");
+        assert.deepStrictEqual(getClassTags(h, ObjectType.INSTANCE), new Set(["lorem", "ipsum"]));
+        assert.deepStrictEqual(getFieldTags(h, "property1", ObjectType.INSTANCE), new Set(["dolor", "sit"]));
+        assert.deepStrictEqual(getMethodParameterTags(h, null, 0, ObjectType.INSTANCE), new Set(["amed","consetetur"]));
+        assert.deepStrictEqual(getMethodTags(h, "method1", ObjectType.INSTANCE), new Set(["sadipscing", "elitr"]));
+        assert.deepStrictEqual(getMethodParameterTags(h, "method1", 0, ObjectType.INSTANCE), new Set(["sed", "diam"]));
     });
 });
