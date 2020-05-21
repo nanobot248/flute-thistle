@@ -1,5 +1,5 @@
 {
-  "name": "@flute/annotations",
+  "name": "@flute/thistle",
   "version": "0.2.0",
   "description": "Annotating and tagging for typescript classes.",
   "main": "lib/main/index.js",
